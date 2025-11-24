@@ -1,4 +1,5 @@
-﻿using EmployeeManagement.Domain.Entites;
+﻿using EmployeeManagement.Domain.Dtos;
+using EmployeeManagement.Domain.Entites;
 using EmployeeManagement.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +36,7 @@ namespace EmployeeManagement.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateDepartment([FromBody] Department department)
+        public async Task<IActionResult> CreateDepartment([FromBody] DepartmentDto department)
         {
             var created = await _departmentService.CreateDepartmentAsync(department);
             return CreatedAtAction(nameof(GetAllDepartments), new { id = created.Id }, created);

@@ -37,6 +37,14 @@ namespace EmployeeManagement.Controllers
             return Ok(employee);
         }
 
+        [HttpGet]
+
+        public async Task<IActionResult>GetEmloyee()
+        {
+            var Employees = await _employeeService.GetEmployeesAsync();
+            return Ok(Employees);
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
@@ -46,5 +54,17 @@ namespace EmployeeManagement.Controllers
 
             return Ok(new { message = result.Message });
         }
+
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateEmployeeData(int id, [FromBody] UpdateEmployeeDepartmentDto dto)
+        {
+            var (success, message, employee) = await _employeeService.UpdateEmployeeAsync(id, dto);
+
+            if (!success)
+                return BadRequest(new { Message = message });
+
+            return Ok(new { Message = message, Data = employee });
+        }
+
     }
 }

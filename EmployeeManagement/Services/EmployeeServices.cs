@@ -64,25 +64,33 @@ namespace EmployeeManagement.Services
 
             _logger.LogInformation($"Employee '{employee.FirstName}' created successfully.");
 
-            return (true, "Employee created successfully.", employee);
+            var employeeWithDepartment = await _context.Employees.Include(e => e.AssignedDepartment).FirstOrDefaultAsync(e => e.Id == employee.Id);
+
+            return (true, "Employee created successfully.", employeeWithDepartment);
         }
 
         // ✅ Update Employee’s Department
-        public async Task<(bool Success, string Message, Employee?)> UpdateEmployeeAsync(int id, UpdateEmployeeDepartmentDto dto)
+        public async Task<(bool Success, string Message, Employee? Employee)> UpdateEmployeeAsync(int id, UpdateEmployeeDepartmentDto dto)
         {
             var employee = await _context.Employees.FindAsync(id);
+
             if (employee == null)
                 return (false, "Employee not found.", null);
 
-            var department = await _context.Departments.FindAsync(dto.DepartmentId);
+            // Check department
+            var department = await _context.Departments
+                .FirstOrDefaultAsync(d => d.Id == dto.DepartmentId && !d.isDeleted);
+
             if (department == null)
-                return (false, "Department not found.", null);
+                return (false, "Invalid department.", null);
 
             employee.DepartmentId = dto.DepartmentId;
+
             await _context.SaveChangesAsync();
 
-            return (true, $"Employee '{employee.FirstName}' successfully moved to '{department.DepartmentName}'.", employee);
+            return (true, "Employee updated successfully.", employee);
         }
+
 
         // ✅ Get All Employees
         public async Task<List<Employee>> GetEmployeesAsync()

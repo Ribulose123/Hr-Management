@@ -1,4 +1,5 @@
-﻿using EmployeeManagement.Domain.Entites;
+﻿using EmployeeManagement.Domain.Dtos;
+using EmployeeManagement.Domain.Entites;
 using EmployeeManagement.Interfaces;
 using EmployeeManagement.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -63,25 +64,31 @@ namespace EmployeeManagement.Services
                 return (false, "An error occurred while deleting the department.");
             }
         }
-        public async Task<Department> CreateDepartmentAsync(Department department)
+        public async Task<Department> CreateDepartmentAsync(DepartmentDto dto)
         {
-            if (department == null)
-                throw new ArgumentNullException(nameof(department));
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
 
-            if (string.IsNullOrWhiteSpace(department.DepartmentName))
+            if (string.IsNullOrWhiteSpace(dto.DepartmentName))
                 throw new ArgumentException("Department name is required");
 
             bool exists = await _context.Departments
-                .AnyAsync(d => d.DepartmentName == department.DepartmentName);
+                .AnyAsync(d => d.DepartmentName == dto.DepartmentName);
 
             if (exists)
                 throw new InvalidOperationException("Department already exists");
+
+            var department = new Department
+            {
+                DepartmentName = dto.DepartmentName
+            };
 
             await _context.Departments.AddAsync(department);
             await _context.SaveChangesAsync();
 
             return department;
         }
+
 
 
 
