@@ -1,0 +1,16 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/EmployeeManagement/FileContentIndex
+/.vs/EmployeeManagement/CopilotIndices/17.14.1368.60722
+/.vs/EmployeeManagement
+/EmployeeManagement/bin/Debug/net8.0
+/EmployeeManagement/obj
+/EmployeeManagement.Domain/bin/Debug/net8.0
+/EmployeeManagement.Domain/obj
+/EmployeeManagement.Persistence/bin/Debug/net8.0
+/EmployeeManagement.Persistence/obj
+/PastOrTodayDateAttribute.cs
+/.gitignore
+/.gitignore
