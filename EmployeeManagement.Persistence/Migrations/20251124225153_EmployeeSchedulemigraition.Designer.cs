@@ -4,6 +4,7 @@ using EmployeeManagement.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EmployeeManagement.Persistence.Migrations
 {
     [DbContext(typeof(EmployeeManagementDbContext))]
-    partial class EmployeeManagementDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251124225153_EmployeeSchedulemigraition")]
+    partial class EmployeeSchedulemigraition
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,39 +24,6 @@ namespace EmployeeManagement.Persistence.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("Attendance", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("ClockInTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ClockOutTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
-
-                    b.Property<double?>("OvertimeHours")
-                        .HasColumnType("float");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double?>("TotalHours")
-                        .HasColumnType("float");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId");
-
-                    b.ToTable("Attendances");
-                });
 
             modelBuilder.Entity("EmployeeManagement.Domain.Dtos.EmployeeDto", b =>
                 {
@@ -78,6 +48,33 @@ namespace EmployeeManagement.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("EmployeeDto");
+                });
+
+            modelBuilder.Entity("EmployeeManagement.Domain.Entites.Attendance", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("ClockInTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ClockOutTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<double?>("TotalHours")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.ToTable("Attendances");
                 });
 
             modelBuilder.Entity("EmployeeManagement.Domain.Entites.Department", b =>
@@ -139,27 +136,12 @@ namespace EmployeeManagement.Persistence.Migrations
                     b.Property<int>("BreakTime")
                         .HasColumnType("int");
 
-                    b.Property<bool>("EarlyExit")
-                        .HasColumnType("bit");
-
                     b.Property<TimeSpan>("EndTime")
                         .HasColumnType("time");
-
-                    b.Property<bool>("IsAbsent")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsLate")
-                        .HasColumnType("bit");
-
-                    b.Property<double>("LateMinutes")
-                        .HasColumnType("float");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("OvertimeHours")
-                        .HasColumnType("float");
 
                     b.Property<TimeSpan>("StartTime")
                         .HasColumnType("time");
@@ -215,7 +197,7 @@ namespace EmployeeManagement.Persistence.Migrations
                     b.ToTable("Employees");
                 });
 
-            modelBuilder.Entity("Attendance", b =>
+            modelBuilder.Entity("EmployeeManagement.Domain.Entites.Attendance", b =>
                 {
                     b.HasOne("EmployeeManagement.Domain.Entities.Employee", "Employee")
                         .WithMany()

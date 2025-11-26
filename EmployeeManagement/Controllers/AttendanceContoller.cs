@@ -1,7 +1,5 @@
 ﻿using EmployeeManagement.Domain.Dtos;
 using EmployeeManagement.Interfaces;
-using EmployeeManagement.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeManagement.Controllers
@@ -10,32 +8,67 @@ namespace EmployeeManagement.Controllers
     [ApiController]
     public class AttendanceContoller : ControllerBase
     {
-        private readonly AttendanceServices _attendanceServices;
+        private readonly IAttendanceService _attendanceServices;
 
-        public AttendanceContoller(AttendanceServices attendanceServices)
+        public AttendanceContoller(IAttendanceService attendanceServices)
         {
             _attendanceServices = attendanceServices;
         }
 
         [HttpPost("clock-in")]
-        public async Task<IActionResult> ClockIn(ClockInDto dto)
+        public async Task<IActionResult> ClockIn([FromBody] ClockInDto dto)
         {
-            var result = await _attendanceServices.ClockInAsync(dto);
-            return Ok(result);
-        }
-        [HttpPost("clock-out")]
+            try
+            {
+                var (success, message) = await _attendanceServices.ClockInAsync(dto);
 
-        public async Task<IActionResult> ClockOut(ClockOutDto dto)
+                if (!success)
+                    return BadRequest(new { message });
+
+                return Ok(new { message });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Clock-In ERROR: " + ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpPost("clock-out")]
+        public async Task<IActionResult> ClockOut([FromBody] ClockOutDto dto)
         {
-            var result = await _attendanceServices.ClockOutAsync(dto);
-            return Ok(result);
+            try
+            {
+                var (success, message) = await _attendanceServices.ClockOutAsync(dto);
+
+                if (!success)
+                    return BadRequest(new { message });
+
+                return Ok(new { message });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Clock-Out ERROR: " + ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
 
         [HttpGet("employee/{employeeId}")]
         public async Task<IActionResult> GetEmployeeAttendance(int employeeId)
         {
-            var records = await _attendanceServices.GetAttendanceByEmployeeAsync(employeeId);
-            return Ok(records);
+            try
+            {
+                var records = await _attendanceServices.GetAttendanceByEmployeeAsync(employeeId);
+                return Ok(records);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Attendance Fetch ERROR: " + ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
     }
 }
