@@ -9,15 +9,12 @@ namespace EmployeeManagement.Domain.Entites
     public class Shift
     {
         public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;   
+        public string Name { get; set; } = string.Empty;
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
-        public int BreakTime { get; set; }
-        public bool isOvernight { get; set; } = false;
-        public bool IsLate { get; set; }
-        public double LateMinutes { get; set; }
-        public bool EarlyExit { get; set; }
-        public double OvertimeHours { get; set; }
-        public bool IsAbsent { get; set; }
+        public int BreakMinutes { get; set; } = 60;
+        public bool IsOvernight { get; set; } = false;
+
+        public List<EmployeeSchedule> Schedules { get; set; } = new();
     }
 }

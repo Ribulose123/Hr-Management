@@ -7,58 +7,133 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EmployeeManagement.Services
 {
-    public class AttendanceServices:IAttendanceService
+    public class AttendanceServices : IAttendanceService
     {
         private readonly EmployeeManagementDbContext _context;
         private readonly ILogger<AttendanceServices> _logger;
+
         public AttendanceServices(EmployeeManagementDbContext context, ILogger<AttendanceServices> logger)
         {
             _context = context;
             _logger = logger;
         }
 
-        //ClockIn
-        public async Task<(bool Success, string Message)> ClockInAsync (ClockInDto dto)
+        // ---------------------------------------------------------
+        // 1️⃣ ENSURE DEFAULT SHIFT EXISTS (8am – 5pm)
+        // ---------------------------------------------------------
+        private async Task<int> EnsureDefaultShiftExists()
         {
-            bool employeeExists = await _context.Employees.AnyAsync(e => e.Id == dto.EmployeeId);
+            var shift = await _context.Shifts
+                .FirstOrDefaultAsync(s => s.Name == "Default Work Shift");
 
-            if(!employeeExists)
+            if (shift == null)
+            {
+                shift = new Shift
+                {
+                    Name = "Default Work Shift",
+                    StartTime = new TimeSpan(8, 0, 0),
+                    EndTime = new TimeSpan(17, 0, 0),
+                    BreakMinutes = 60
+                };
+
+                _context.Shifts.Add(shift);
+                await _context.SaveChangesAsync();
+            }
+
+            return shift.Id;
+        }
+
+        // ---------------------------------------------------------
+        // 2️⃣ ENSURE DAILY SCHEDULE FOR EMPLOYEE
+        // ---------------------------------------------------------
+        private async Task<EmployeeSchedule> EnsureScheduleForTodayAsync(int employeeId)
+        {
+            var today = DateTime.Today;
+
+            var schedule = await _context.EmployeeSchedules
+                .Include(es => es.Shift)
+                .FirstOrDefaultAsync(es =>
+                    es.EmployeeId == employeeId &&
+                    es.WorkDate.Date == today);
+
+            if (schedule != null)
+                return schedule;
+
+            int defaultShiftId = await EnsureDefaultShiftExists();
+
+            schedule = new EmployeeSchedule
+            {
+                EmployeeId = employeeId,
+                WorkDate = today,
+                ShiftId = defaultShiftId
+            };
+
+            _context.EmployeeSchedules.Add(schedule);
+            await _context.SaveChangesAsync();
+
+            // Reload with Shift object included
+            return await _context.EmployeeSchedules
+                .Include(es => es.Shift)
+                .FirstAsync(es => es.Id == schedule.Id);
+        }
+
+        // ---------------------------------------------------------
+        // 3️⃣ CLOCK IN
+        // ---------------------------------------------------------
+        public async Task<(bool Success, string Message)> ClockInAsync(ClockInDto dto)
+        {
+            if (!await _context.Employees.AnyAsync(e => e.Id == dto.EmployeeId))
                 return (false, "Employee does not exist.");
 
-            var schedule = await _context.EmployeeSchedules.Include(e => e.Shift).FirstOrDefaultAsync((es => es.EmployeeId ==dto.EmployeeId && es.WorkDate.Date == DateTime.Today));
+            var schedule = await EnsureScheduleForTodayAsync(dto.EmployeeId);
+            if (schedule == null)
+                return (false, "Schedule could not be created for today.");
 
-            if(schedule == null)
-                return (false, "You are not scheduled to work today.");
+            var existing = await _context.Attendances
+                .FirstOrDefaultAsync(a =>
+                    a.EmployeeId == dto.EmployeeId &&
+                    a.ClockInTime.Date == DateTime.Today);
 
-            if (schedule.WorkDate.Date > DateTime.Today)
-                return (false, "you are late");
+            if (existing != null)
+                return (false, "You have already clocked in.");
 
-            var existingRecord = await _context.Attendances.FirstOrDefaultAsync(a => a.EmployeeId == dto.EmployeeId && a.ClockInTime != null);
+            DateTime shiftStart = schedule.WorkDate.Date.Add(schedule.Shift.StartTime);
+            DateTime shiftEnd = schedule.WorkDate.Date.Add(schedule.Shift.EndTime);
 
-            if(existingRecord != null) 
-                return (false, "Employee has already clocked in.");
+            // 60-minute grace period
+            var gracePeriod = TimeSpan.FromMinutes(60);
+            DateTime graceLimit = shiftStart.Add(gracePeriod);
 
-            DateTime sheduleDate = schedule.WorkDate.Date + schedule.Shift.StartTime;
             DateTime now = DateTime.Now;
+
+            // ❌ No clock-in after closing hours
+            if (now > shiftEnd)
+                return (false, "Clock-in failed. You cannot clock in after closing hours.");
 
             string status;
 
-            if (now > sheduleDate)
+            if (now < shiftStart)
             {
-                status = "Late";
-            } else if(now < sheduleDate)
+                status = "Early";   // before start time
+            }
+            else if (now > shiftStart && now <= graceLimit)
             {
-                status = "Early";
-            }    else
+                status = "Late (within grace period)";
+            }
+            else if(now > graceLimit && now <= shiftEnd)
+            {
+                status = "Late";    // after grace period
+            } else
             {
                 status = "On Time";
             }
 
             var attendance = new Attendance
-        {
-            EmployeeId = dto.EmployeeId,
-            ClockInTime = DateTime.Now
-        };
+            {
+                EmployeeId = dto.EmployeeId,
+                ClockInTime = now,
+                Status = status
+            };
 
             await _context.Attendances.AddAsync(attendance);
             await _context.SaveChangesAsync();
@@ -66,83 +141,69 @@ namespace EmployeeManagement.Services
             return (true, $"Clock-in successful. Status: {status}");
         }
 
-        //ClockOut
 
+        // ---------------------------------------------------------
+        // 4️⃣ CLOCK OUT
+        // ---------------------------------------------------------
         public async Task<(bool Success, string Message)> ClockOutAsync(ClockOutDto dto)
         {
             int employeeId = dto.EmployeeId;
-            // 1. Check if employee exists
-            bool employeeExists = await _context.Employees.AnyAsync(e => e.Id == employeeId);
-            if (!employeeExists)
+
+            if (!await _context.Employees.AnyAsync(e => e.Id == employeeId))
                 return (false, "Employee does not exist.");
 
-            // 2. Get schedule for today
-            var schedule = await _context.EmployeeSchedules
-                .Include(es => es.Shift)
-                .FirstOrDefaultAsync(es =>
-                    es.EmployeeId == employeeId &&
-                    es.WorkDate.Date == DateTime.Today);
+            // Get today's schedule
+            var schedule = await EnsureScheduleForTodayAsync(employeeId);
 
-            if (schedule == null)
-                return (false, "You are not scheduled to work today.");
+            DateTime shiftEnd = schedule.WorkDate.Date.Add(schedule.Shift.EndTime);
 
-            var shiftStart = schedule.WorkDate.Date.Add(schedule.Shift.StartTime);
-            var shiftEnd = schedule.WorkDate.Date.Add(schedule.Shift.EndTime);
-
-            // 3. Get today's attendance record
+            // Get today's attendance
             var attendance = await _context.Attendances
                 .FirstOrDefaultAsync(a =>
                     a.EmployeeId == employeeId &&
                     a.ClockInTime.Date == DateTime.Today);
 
             if (attendance == null)
-                return (false, "You have not clocked in.");
+                return (false, "You have not clocked in today.");
 
-            // Prevent double clock-out
             if (attendance.ClockOutTime != null)
                 return (false, "You have already clocked out.");
 
-            // 4. Clock-out
+            // Perform clock-out
             attendance.ClockOutTime = DateTime.Now;
+            attendance.TotalHours =
+                (attendance.ClockOutTime.Value - attendance.ClockInTime).TotalHours;
 
-            // 5. Calculate total work hours
-            attendance.TotalHours = (attendance.ClockOutTime.Value - attendance.ClockInTime).TotalHours;
-
-            // 6. Determine Early Exit / On-time / Overtime
+            // Determine clock-out status
             string statusMessage;
 
             if (attendance.ClockOutTime < shiftEnd)
             {
-                statusMessage = "Clock-out successful. You ended **early**.";
+                statusMessage = "Clock-out successful. You ended early.";
             }
-            else if (attendance.ClockOutTime >= shiftEnd && attendance.ClockOutTime <= shiftEnd.AddMinutes(10))
+            else if (attendance.ClockOutTime <= shiftEnd.AddMinutes(10))
             {
-                // 0–10 min late is considered on-time for exit
-                statusMessage = "Clock-out successful. You ended **on time**.";
+                statusMessage = "Clock-out successful. You ended on time.";
             }
             else
             {
-                // After shift end = overtime
                 var overtime = (attendance.ClockOutTime.Value - shiftEnd).TotalHours;
-
-                statusMessage = $"Clock-out successful. **Overtime: {overtime:F2} hrs**.";
+                statusMessage = $"Clock-out successful. Overtime: {overtime:F2} hours.";
             }
 
             await _context.SaveChangesAsync();
-
             return (true, statusMessage);
         }
 
-
-
-        //Get Attendance Records
+        // 5️⃣ GET ATTENDANCE HISTORY
+        // ---------------------------------------------------------
         public async Task<IEnumerable<Attendance>> GetAttendanceByEmployeeAsync(int employeeId)
         {
             return await _context.Attendances
-                .Where(a => a.EmployeeId == employeeId).Include(e =>e.Employee)
+                .Include(a => a.Employee)
+                .Where(a => a.EmployeeId == employeeId)
                 .OrderByDescending(a => a.ClockInTime)
                 .ToListAsync();
         }
-
     }
 }
