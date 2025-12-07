@@ -18,7 +18,8 @@ namespace EmployeeManagement.Domain.Entities
         public int DepartmentId { get; set; }
         public Department? AssignedDepartment { get; set; }
         public int ShiftId { get; set; }
-        public Shift Shift { get; set; }
+        public Shift? Shift { get; set; }
+        public int AnnualLeave { get; set; } = 20;
 
     }
 }

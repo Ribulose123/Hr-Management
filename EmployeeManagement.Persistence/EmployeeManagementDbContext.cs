@@ -27,5 +27,6 @@ namespace EmployeeManagement.Persistence
         public DbSet<Shift> Shifts { get; set; }
         public DbSet<EmployeeSchedule> EmployeeSchedules { get; set; }
         public DbSet<Payroll> Payrolls { get; set; }
+        public DbSet<LeaveRequest> LeaveRequests { get; set; }
     }
 }
