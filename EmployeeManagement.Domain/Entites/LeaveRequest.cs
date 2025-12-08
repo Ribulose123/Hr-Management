@@ -6,7 +6,7 @@ namespace EmployeeManagement.Domain.Entites
     public class LeaveRequest
     {
         public int Id { get; set; }
-
+        public string? FullName { get; set; }
         public int EmployeeId { get; set; }
         public Employee? Employee { get; set; }
 

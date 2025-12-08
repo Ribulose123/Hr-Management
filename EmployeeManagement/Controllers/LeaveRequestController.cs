@@ -18,10 +18,18 @@ namespace EmployeeManagement.Controllers
         [HttpPost("apply")]
         public async Task<IActionResult> ApplyForLeave([FromBody] ApplyLeaveDto dto)
         {
-            var result = await _leaveRequestServices.ApplyForLeaveAsnyc(dto);
+            var result = await _leaveRequestServices.ApplyForLeaveAsync(dto);
             if (!result.Success)
                 return BadRequest(result.Message);
             return Ok(result.Data);
+        }
+
+        //
+        [HttpGet("requests")]
+        public async Task<IActionResult> GetRequests()
+        {
+            var list = await _leaveRequestServices.GetLeaveRequestsAsync();
+            return Ok(list);
         }
     }
 }

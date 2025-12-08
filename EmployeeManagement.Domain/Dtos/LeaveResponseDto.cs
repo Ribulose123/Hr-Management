@@ -19,6 +19,6 @@ namespace EmployeeManagement.Domain.Dtos
         public int TotalDays { get; set; }
 
         public Status Status { get; set; }
-        public string? Remark { get; set; }
+        public string? ManagerComments { get; set; }
     }
 }

@@ -11,6 +11,6 @@ namespace EmployeeManagement.Domain.Dtos
     {
         public int LeaveId { get; set; }
         public Status Status { get; set; } = Status.Pending;
-        public string? Remmarks { get; set; }
+        public string? ManagerComments { get; set; }
     }
 }
