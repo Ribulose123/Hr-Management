@@ -6,12 +6,9 @@ using System.Threading.Tasks;
 
 namespace EmployeeManagement.Domain.Enums
 {
-    public enum LeaveType
+    public enum Gender
     {
-        Annual,
-        Sick,
-        Casual,
-        Maternity,
-        Paternity
+        Male,
+        Female
     }
 }

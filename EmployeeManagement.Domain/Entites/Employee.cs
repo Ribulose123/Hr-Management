@@ -1,4 +1,5 @@
 ﻿using EmployeeManagement.Domain.Entites;
+using EmployeeManagement.Domain.Enums;
 using EmployeeManagement.Domain.Validation;
 
 namespace EmployeeManagement.Domain.Entities
@@ -14,12 +15,14 @@ namespace EmployeeManagement.Domain.Entities
         public double BasicSalary {get; set;}
         [PastOrTodayDate(ErrorMessage = "Date of hire must be today or past")]
         public DateTime HireDate {get; set; }
+        public Gender Gender {get; set;}
         public bool IsActive {get; set; }
         public int DepartmentId { get; set; }
         public Department? AssignedDepartment { get; set; }
         public int? ShiftId { get; set; }
         public Shift? Shift { get; set; }
         public int AnnualLeave { get; set; } = 20;
+        public int CasualLeave { get; set; } = 6;
 
     }
 }

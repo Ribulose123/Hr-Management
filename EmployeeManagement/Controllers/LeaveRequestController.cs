@@ -15,21 +15,53 @@ namespace EmployeeManagement.Controllers
             _leaveRequestServices = leaveRequestServices;
         }
         // Apply for leave
-        [HttpPost("apply")]
+        [HttpPost("apply-leave")]
         public async Task<IActionResult> ApplyForLeave([FromBody] ApplyLeaveDto dto)
         {
             var result = await _leaveRequestServices.ApplyForLeaveAsync(dto);
+
             if (!result.Success)
-                return BadRequest(result.Message);
-            return Ok(result.Data);
+                return BadRequest(new { message = result.Message });
+
+            return Ok(result);
         }
 
-        //
+
+
+        //Leave request
         [HttpGet("requests")]
         public async Task<IActionResult> GetRequests()
         {
             var list = await _leaveRequestServices.GetLeaveRequestsAsync();
             return Ok(list);
         }
+
+
+        //LeaveApproval
+        [HttpPost("approve-reject")]
+        public async Task<IActionResult> ApproveOrRejectLeave([FromBody] LeaveApprovalDto dto)
+        {
+            var result = await _leaveRequestServices.ApproveOrRejectLeave(dto);
+
+            if (!result.Success)
+                return BadRequest(new { message = result.Message });
+
+            return Ok(new
+            {
+                message = result.Message,
+                data = result.Data
+            });
+        }
+
+
+        //LeaveBalance 
+
+        [HttpGet("balance/{employeeId}")]
+        public async Task<IActionResult> GetLeaveBalance(int employeeId)
+        {
+            var result = await _leaveRequestServices.GetLeaveBalanceAsync(employeeId);
+            return Ok(new { LeaveBalance = result });
+        }
+
     }
 }

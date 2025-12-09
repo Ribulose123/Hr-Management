@@ -14,7 +14,7 @@ namespace EmployeeManagement.Domain.Entites
         public DateOnly EndDate { get; set; }
 
         public int TotalDays { get; set; }
-        public  LeaveType LeaveType { get; set; } =LeaveType.Annaual;
+        public  LeaveType LeaveType { get; set; } =LeaveType.Annual;
         public Status Status { get; set; } = Status.Pending;
 
         public string? ManagerComments { get; set; } 

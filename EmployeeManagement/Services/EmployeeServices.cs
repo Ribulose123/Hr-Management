@@ -21,7 +21,7 @@ namespace EmployeeManagement.Services
         }
 
         // ✅ Create Employee
-        public async Task<(bool Success, string Message, Employee? Employee)> CreateEmployeeAsync(CreateEmployeeDto dto)
+        public async Task<(bool Success, string Message, EmployeeResponseDto? Employee)> CreateEmployeeAsync(CreateEmployeeDto dto)
         {
             if (dto == null)
                 return (false, "Invalid employee data.", null);
@@ -66,7 +66,17 @@ namespace EmployeeManagement.Services
 
             var employeeWithDepartment = await _context.Employees.Include(e => e.AssignedDepartment).FirstOrDefaultAsync(e => e.Id == employee.Id);
 
-            return (true, "Employee created successfully.", employeeWithDepartment);
+            var response = new EmployeeResponseDto
+            {
+                Id = dto.id,
+                FirstName = employee.FirstName,
+                LastName =employee.LastName,
+                Position =employee.Position,
+                Email = employee.Email,
+                DepartmentName = employeeWithDepartment?.AssignedDepartment?.DepartmentName
+            };
+
+            return (true, "Employee created successfully.", response);
         }
 
         // ✅ Update Employee’s Department

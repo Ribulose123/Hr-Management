@@ -12,6 +12,7 @@ namespace EmployeeManagement.Services
     {
         private readonly ILogger<LeaveRequestServices> _logger;
         private readonly EmployeeManagementDbContext _context;
+
         public LeaveRequestServices(EmployeeManagementDbContext context, ILogger<LeaveRequestServices> logger)
         {
             _context = context;
@@ -37,11 +38,41 @@ namespace EmployeeManagement.Services
 
             var remainingLeave = employee.AnnualLeave - approvedLeaveDays;
 
+            // Special Leave Rules
+
+            if (dto.LeaveType == LeaveType.Maternity)
+            {
+                if (employee.Gender != Gender.Female)
+                    return (false, "Only Female employees can apply", null);
+
+                totalDays = 90;
+                remainingLeave = 0;
+                _logger.LogInformation("Maternity leave applied: 90 days enforced.");
+            } else if (dto.LeaveType == LeaveType.Paternity)
+            {
+                if (employee.Gender != Gender.Male)
+                    return (false, "Only male employees can apply", null);
+
+                totalDays = 30;
+                remainingLeave = 0;
+                _logger.LogInformation("Maternity leave applied: 30 days enforced.");
+            }
+            else if (dto.LeaveType == LeaveType.Casual)
+            {
+                remainingLeave = employee.CasualLeave -totalDays;
+            }
+
+            //
+
+
             _logger.LogInformation("Employee {Id} AnnualLeave: {AnnualLeave}, ApprovedLeaveDays: {ApprovedLeaveDays}, RequestedDays: {RequestedDays}, RemainingLeave: {RemainingLeave}",
                 employee.Id, employee.AnnualLeave, approvedLeaveDays, totalDays, remainingLeave);
 
-            if (totalDays > remainingLeave)
-                return (false, "Insufficient annual leave balance.", null);
+            if (dto.LeaveType != LeaveType.Maternity && dto.LeaveType != LeaveType.Paternity)
+            {
+                if (totalDays > remainingLeave)
+                    return (false, $"Insufficient {dto.LeaveType} leave balance.", null);
+            } 
 
             var overlappingLeave = await _context.LeaveRequests.AnyAsync(l =>
                 l.EmployeeId == dto.EmployeeId &&
@@ -81,6 +112,46 @@ namespace EmployeeManagement.Services
 
             return (true, "Leave request submitted successfully.", response);
         }
+        public async Task<(bool Success, string Message, LeaveResponseDto? Data)> ApproveOrRejectLeave(LeaveApprovalDto dto)
+        {
+            var leaveRequest = await _context.LeaveRequests
+                .Include(e => e.Employee)
+                .FirstOrDefaultAsync(e => e.Id == dto.LeaveId);
+
+            if (leaveRequest == null)
+                return (false, "Leave request not found", null);
+
+            if (dto.Status == Status.Approved)
+            {
+                leaveRequest.Status = Status.Approved;
+
+                // Deduct from the correct leave balance
+                switch (leaveRequest.LeaveType)
+                {
+                    case LeaveType.Annual:
+                        leaveRequest.Employee.AnnualLeave -= leaveRequest.TotalDays;
+                        break;
+
+
+                    case LeaveType.Casual:
+                        leaveRequest.Employee.CasualLeave -= leaveRequest.TotalDays;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                leaveRequest.Status = Status.Rejected;
+            }
+
+            leaveRequest.ManagerComments = dto.ManagerComments;
+
+            await _context.SaveChangesAsync();
+            return (true, "Leave request updated", null);
+        }
+
         //List of request 
 
         public async Task<List<LeaveResponseDto>> GetLeaveRequestsAsync()
@@ -100,6 +171,22 @@ namespace EmployeeManagement.Services
             ManagerComments = l.ManagerComments
         })
         .ToListAsync();
+        }
+
+        //Get leave balance
+
+        public async Task<int> GetLeaveBalanceAsync(int employeeId)
+        {
+            var employeeExit = await _context.Employees.FindAsync(employeeId);
+            if (employeeExit == null) return 0;
+
+            var approvedLeaveDays = await _context.LeaveRequests
+                .Where(l => l.EmployeeId == employeeId && l.Status == Status.Approved)
+                .SumAsync(l => (int?)l.TotalDays) ?? 0;
+
+            int currentBalance = (employeeExit.AnnualLeave) - approvedLeaveDays;
+
+            return Math.Max(0, currentBalance);
         }
     }
 }

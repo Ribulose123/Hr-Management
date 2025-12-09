@@ -4,6 +4,7 @@ using EmployeeManagement.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EmployeeManagement.Persistence.Migrations
 {
     [DbContext(typeof(EmployeeManagementDbContext))]
-    partial class EmployeeManagementDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251208231018_EmployeeGender")]
+    partial class EmployeeGender
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -230,9 +233,6 @@ namespace EmployeeManagement.Persistence.Migrations
                     b.Property<double>("BasicSalary")
                         .HasPrecision(18, 2)
                         .HasColumnType("float(18)");
-
-                    b.Property<int>("CasualLeave")
-                        .HasColumnType("int");
 
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
