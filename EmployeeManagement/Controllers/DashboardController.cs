@@ -65,5 +65,21 @@ namespace EmployeeManagement.Controllers
                 data = result.Data
             });
         }
+
+        //Get Salary Stat
+        [HttpGet("SalaryStat")]
+
+        public async Task<IActionResult> GetSalaryStat()
+        {
+            var result = await _dashboardServices.SalaryStatAsync();
+            if (!result.Success)
+                return BadRequest(new { result.Message });
+            return Ok(new
+            {
+                success = result.Success,
+                message = result.Message,
+                data = result.Data
+            });
+        }
     }
 }

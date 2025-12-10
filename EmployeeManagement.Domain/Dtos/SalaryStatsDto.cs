@@ -12,5 +12,6 @@ namespace EmployeeManagement.Domain.Dtos
         public decimal HighestSalary { get; set; }
         public decimal LowestSalary { get; set; }
         public decimal AverageSalary { get; set; }
+        public List<DepartmentPayrollDto>? PayrollForDepartment { get; set; }
     }
 }

@@ -90,6 +90,47 @@ namespace EmployeeManagement.Services
         }
 
 
+        // Get Salary Stat
+        public async Task<(bool Success, string Message, SalaryStatsDto Data)> SalaryStatAsync()
+        {
+            // Total net salary
+            var totalSalary = await _context.Payrolls.SumAsync(e => e.NetPay);
+           var highestSalary = await _context.Payrolls.MaxAsync(e => e.NetPay);
+            var lowestSalary = await _context.Payrolls.MinAsync(e => e.NetPay);
+            var averageSalary = await _context.Payrolls.AverageAsync(p => p.NetPay);
+
+            // MUST load Employees + Departments + Payrolls to memory first
+            var employeesWithPayroll = await _context.Employees
+                .Include(e => e.AssignedDepartment)
+                .GroupJoin(
+                    _context.Payrolls,
+                    e => e.Id,
+                    p => p.EmployerId,
+                    (employee, payrolls) => new { employee, payrolls }
+                )
+                .AsNoTracking()
+                .ToListAsync(); 
+
+            var payrollByDepartment = employeesWithPayroll
+                .GroupBy(e => e.employee.AssignedDepartment?.DepartmentName ?? "Unassigned")
+                .Select(g => new DepartmentPayrollDto
+                {
+                    DepartmentName = g.Key,
+                    TotalPayroll =(decimal) g.Sum(x => x.payrolls.Sum(p => p.NetPay))
+                })
+                .ToList();
+
+            var salaryData = new SalaryStatsDto
+            {
+                TotalMonthlyPayroll =(decimal) totalSalary,
+                HighestSalary = (decimal)highestSalary,
+                LowestSalary = (decimal)lowestSalary,
+                AverageSalary = (decimal)averageSalary,
+                PayrollForDepartment = payrollByDepartment
+            };
+
+            return (true, "Salary statistics fetched successfully.", salaryData);
+        }
 
     }
 }
