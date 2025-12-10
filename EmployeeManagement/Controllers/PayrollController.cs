@@ -8,11 +8,11 @@ namespace EmployeeManagement.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PayrollConytroller : ControllerBase
+    public class PayrollController : ControllerBase
     {
         private readonly IPayrollServices _payrollServices;
 
-        public PayrollConytroller (IPayrollServices payrollServices)
+        public PayrollController (IPayrollServices payrollServices)
         {
             _payrollServices = payrollServices;
         }

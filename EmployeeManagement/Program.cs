@@ -17,6 +17,7 @@ builder.Services.AddScoped<IEmployeeServices, EmployeeServices>();
 builder.Services.AddScoped<IAttendanceService, AttendanceServices>();
 builder.Services.AddScoped<IPayrollServices, PayrollServices>();
 builder.Services.AddScoped<ILeaveRequestServices, LeaveRequestServices>();
+builder.Services.AddScoped<IDashboardServices, DashboardServices>();
 
 builder.Services.AddDbContext<EmployeeManagementDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
