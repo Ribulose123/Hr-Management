@@ -132,5 +132,22 @@ namespace EmployeeManagement.Services
             return (true, "Salary statistics fetched successfully.", salaryData);
         }
 
+        // Get Department Stat
+        public async Task<(bool Success, string Message, DepartmentStatsDto Data)> DepartmentStatAsync()
+        {
+            var totalDepartments = await _context.Departments.CountAsync();
+            var DepartmentCounts = await _context.Departments.Select(d => new DepartmentCountDto
+            {
+                DepartmentName = d.DepartmentName,
+                EmployeeCount = _context.Employees.Count(e => e.DepartmentId == d.Id)
+            }).AsNoTracking().ToListAsync();
+
+            var departmentData = new DepartmentStatsDto
+            {
+                TotalDepartments = totalDepartments,
+                DepartmentCounts = DepartmentCounts
+            };
+            return (true , "Department statistics fetched successfully.", departmentData);
+        }
     }
 }

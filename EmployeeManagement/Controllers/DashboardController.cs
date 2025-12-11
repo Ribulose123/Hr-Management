@@ -81,5 +81,20 @@ namespace EmployeeManagement.Controllers
                 data = result.Data
             });
         }
+
+        //Get Department Stat
+        [HttpGet("DepartmentStat")]
+        public async Task<IActionResult> GetDepartmentStat()
+        {
+            var result = await _dashboardServices.DepartmentStatAsync();
+            if (!result.Success)
+                return BadRequest(new { result.Message });
+            return Ok(new
+            {
+                success = result.Success,
+                message = result.Message,
+                data = result.Data
+            });
+        }
     }
 }

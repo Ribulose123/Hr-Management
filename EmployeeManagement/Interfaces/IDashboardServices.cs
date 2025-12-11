@@ -8,5 +8,6 @@ namespace EmployeeManagement.Interfaces
         Task<(bool Success, string Message, LeaveStatsDto Data)> LeaveStatAsync();
         Task<(bool Success, string Message, SalaryStatsDto Data)> SalaryStatAsync();
         Task<(bool Success, string Message, PayrollMonthStatsDto? Data)> PayrollMonthStatAsync(PayrollMonthRequestDto dto);
+        Task <(bool Success, string Message, DepartmentStatsDto Data)> DepartmentStatAsync();
     }
 }
