@@ -1,5 +1,5 @@
 ﻿using EmployeeManagement.Domain.Dtos;
-using EmployeeManagement.Domain.Entites;
+using EmployeeManagement.Domain.Entities;
 
 namespace EmployeeManagement.Interfaces
 {
@@ -8,6 +8,6 @@ namespace EmployeeManagement.Interfaces
         Task<(bool Success, string Message)> DeleteDepartmentAsync(int id);
         Task<Department> CreateDepartmentAsync(DepartmentDto department);
         Task<List<Department>> GetAllDepartmentsAsync();
-        Task<Department?> UpdateDepartmentAsync(int id, Department updatedDepartment);
+        Task<Department?> UpdateDepartmentAsync(int id, Department departments);
     }
 }

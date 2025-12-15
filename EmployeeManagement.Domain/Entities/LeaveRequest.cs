@@ -1,7 +1,7 @@
 ﻿using EmployeeManagement.Domain.Entities;
 using EmployeeManagement.Domain.Enums;
 
-namespace EmployeeManagement.Domain.Entites
+namespace EmployeeManagement.Domain.Entities
 {
     public class LeaveRequest
     {

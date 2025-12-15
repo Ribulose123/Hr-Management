@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EmployeeManagement.Domain.Entites
+namespace EmployeeManagement.Domain.Entities
 {
     public class Shift
     {

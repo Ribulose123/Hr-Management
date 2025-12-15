@@ -1,4 +1,4 @@
-﻿using EmployeeManagement.Domain.Entites;
+﻿using EmployeeManagement.Domain.Entities;
 using EmployeeManagement.Domain.Enums;
 using EmployeeManagement.Domain.Validation;
 

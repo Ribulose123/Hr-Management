@@ -1,5 +1,5 @@
 ﻿using EmployeeManagement.Domain.Dtos;
-using EmployeeManagement.Domain.Entites;
+using EmployeeManagement.Domain.Entities;
 using EmployeeManagement.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -43,9 +43,9 @@ namespace EmployeeManagement.Controllers
         }
 
         [HttpPatch("{id}")]
-        public async Task<IActionResult> UpdateDepartment(int id, [FromBody] Department department)
+        public async Task<IActionResult> UpdateDepartment(int id, [FromBody] Department departments)
         {
-            var updated = await _departmentService.UpdateDepartmentAsync(id, department);
+            var updated = await _departmentService.UpdateDepartmentAsync(id, departments);
             if (updated == null) return NotFound();
             return Ok(updated);
         }

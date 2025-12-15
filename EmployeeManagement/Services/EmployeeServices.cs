@@ -1,5 +1,4 @@
 ﻿using EmployeeManagement.Domain.Dtos;
-using EmployeeManagement.Domain.Entites;
 using EmployeeManagement.Domain.Entities;
 using EmployeeManagement.Interfaces;
 using EmployeeManagement.Persistence;

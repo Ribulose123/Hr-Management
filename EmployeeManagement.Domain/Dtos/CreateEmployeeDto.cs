@@ -1,4 +1,4 @@
-﻿using EmployeeManagement.Domain.Entites;
+﻿using EmployeeManagement.Domain.Entities;
 using EmployeeManagement.Domain.Validation;
 
 namespace EmployeeManagement.Domain.Dtos

@@ -1,5 +1,5 @@
 ﻿using EmployeeManagement.Domain.Dtos;
-using EmployeeManagement.Domain.Entites;
+using EmployeeManagement.Domain.Entities;
 
 namespace EmployeeManagement.Interfaces
 {

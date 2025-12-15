@@ -2,7 +2,7 @@
 
 using EmployeeManagement.Domain.Entities;
 
-namespace EmployeeManagement.Domain.Entites
+namespace EmployeeManagement.Domain.Entities
 {
     public class Department
     {

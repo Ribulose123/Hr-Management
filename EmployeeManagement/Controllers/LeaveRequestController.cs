@@ -1,5 +1,6 @@
 ﻿using EmployeeManagement.Domain.Dtos;
 using EmployeeManagement.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -38,6 +39,7 @@ namespace EmployeeManagement.Controllers
 
 
         //LeaveApproval
+        [Authorize (Roles = "Admin")]
         [HttpPost("approve-reject")]
         public async Task<IActionResult> ApproveOrRejectLeave([FromBody] LeaveApprovalDto dto)
         {

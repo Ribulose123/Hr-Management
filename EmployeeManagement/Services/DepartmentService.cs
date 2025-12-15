@@ -1,5 +1,5 @@
 ﻿using EmployeeManagement.Domain.Dtos;
-using EmployeeManagement.Domain.Entites;
+using EmployeeManagement.Domain.Entities;
 using EmployeeManagement.Interfaces;
 using EmployeeManagement.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -100,14 +100,17 @@ namespace EmployeeManagement.Services
                 .ToListAsync();
         }
 
-        public async Task<Department?> UpdateDepartmentAsync(int id, Department updatedDepartment)
+        public async Task<Department?> UpdateDepartmentAsync(int id, Department departments)
         {
             var department = await _context.Departments.FindAsync(id);
             if (department == null) return null;
 
-            department.DepartmentName = updatedDepartment.DepartmentName;
+            department.DepartmentName = departments.DepartmentName;
             await _context.SaveChangesAsync();
             return department;
         }
+
+
+
     }
 }
