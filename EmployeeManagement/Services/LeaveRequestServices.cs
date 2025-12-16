@@ -148,6 +148,16 @@ namespace EmployeeManagement.Services
             leaveRequest.ManagerComments = dto.ManagerComments;
 
             await _context.SaveChangesAsync();
+
+
+
+            var leaveResponse = new LeaveResponseDto
+            {
+                FullName = $"{leaveRequest.Employee?.FirstName} {leaveRequest.Employee?.LastName}",
+                Status = dto.Status,
+                StartDate = leaveRequest.StartDate,
+                EndDate = leaveRequest.EndDate,
+            };
             return (true, "Leave request updated", null);
         }
 

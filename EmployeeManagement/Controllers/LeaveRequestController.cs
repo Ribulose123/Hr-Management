@@ -30,6 +30,8 @@ namespace EmployeeManagement.Controllers
 
 
         //Leave request
+        [Tags("Admin")]
+        [Authorize (Roles = "Admin")]
         [HttpGet("requests")]
         public async Task<IActionResult> GetRequests()
         {
@@ -39,6 +41,7 @@ namespace EmployeeManagement.Controllers
 
 
         //LeaveApproval
+        [Tags("Admin")]
         [Authorize (Roles = "Admin")]
         [HttpPost("approve-reject")]
         public async Task<IActionResult> ApproveOrRejectLeave([FromBody] LeaveApprovalDto dto)
@@ -57,7 +60,7 @@ namespace EmployeeManagement.Controllers
 
 
         //LeaveBalance 
-
+        
         [HttpGet("balance/{employeeId}")]
         public async Task<IActionResult> GetLeaveBalance(int employeeId)
         {

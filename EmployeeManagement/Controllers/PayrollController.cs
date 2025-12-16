@@ -1,7 +1,6 @@
 ﻿using EmployeeManagement.Domain.Dtos;
 using EmployeeManagement.Interfaces;
-using EmployeeManagement.Services;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeManagement.Controllers
@@ -18,6 +17,8 @@ namespace EmployeeManagement.Controllers
         }
 
         //Geneterate Payroll
+        [Tags ("Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost("generate-payroll")]
         public async Task<IActionResult> GeneratePayroll([FromBody] GeneratePayrollDto dto)
         {
@@ -29,6 +30,8 @@ namespace EmployeeManagement.Controllers
             return Ok(result.Message);
         }
 
+        [Tags("Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("employee/{employeeId}/payroll")]
 
         public async Task<IActionResult> GetEmployeePayroll(int employeeId, int year, int month)
@@ -43,7 +46,8 @@ namespace EmployeeManagement.Controllers
 
 
         //payroll summary
-
+        [Tags("Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("employee/{employeeId}/summary")]
         public async Task<IActionResult> GetPayrollSummary(int employeeId, int year)
         {
@@ -56,6 +60,8 @@ namespace EmployeeManagement.Controllers
         }
 
         //payroll history 
+        [Tags("Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("employee/{employeeId}/history")]
         public async Task<IActionResult> GetPayrollHistory(int employeeId)
         {
